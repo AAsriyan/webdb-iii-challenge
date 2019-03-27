@@ -12,15 +12,16 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id;
+
   try {
-    const student = await db
-      .select("id", "name", "cohort_id AS cohort")
-      .table("students")
-      .where({ id })
-      .first();
-    if (student) {
-      res.status(200).json(student);
+    const studentInfo = await db("students")
+      .where("students.id", id)
+      .join("cohorts", "cohorts.id", "students.cohort_id")
+      .select("students.id", "students.name", "cohorts.name as cohort");
+
+    if (studentInfo) {
+      res.status(200).json(studentInfo);
     } else {
       res.status(404).json({ message: "Student not found" });
     }
